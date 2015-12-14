@@ -1,0 +1,116 @@
+!
+!
+!
+!
+!
+!
+!
+!
+
+!
+version 12.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname R3
+!
+boot-start-marker
+boot-end-marker
+!
+!
+no aaa new-model
+memory-size iomem 5
+no ip icmp rate-limit unreachable
+!
+!
+ip cef
+no ip domain lookup
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+! 
+!
+crypto isakmp policy 10
+ encr aes 256
+ authentication pre-share
+ group 5
+ lifetime 3600
+crypto isakmp key VAULT address 192.168.12.1
+!
+crypto ipsec security-association lifetime seconds 1800
+!
+crypto ipsec transform-set MYTRANS esp-aes 256 esp-sha-hmac 
+!
+crypto map MYMAP 10 ipsec-isakmp 
+ set peer 192.168.12.1
+ set transform-set MYTRANS 
+ set pfs group5
+ match address 100
+!
+!
+!
+!
+interface Loopback1
+ ip address 3.3.3.3 255.255.255.0
+!
+interface FastEthernet0/0
+ ip address 192.168.23.3 255.255.255.0
+ duplex auto
+ speed auto
+ crypto map MYMAP
+!
+router ospf 1
+ log-adjacency-changes
+ network 0.0.0.0 255.255.255.255 area 0
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+access-list 100 permit ip 3.3.3.0 0.0.0.255 1.1.1.0 0.0.0.255
+no cdp log mismatch duplex
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ login
+!
+!
+end
